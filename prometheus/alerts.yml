@@ -1,0 +1,16 @@
+groups:
+  - name: app
+    rules:
+      - alert: HighErrorRate
+        # Share of requests answered with a 5xx over 5 minutes. The demo app fails 20% of /work requests
+        # on purpose, so with traffic this alert is expected to fire after about 2 minutes.
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
+            /
+          sum(rate(http_requests_total[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "More than 5% of requests are failing"
+          description: "Error rate is {{ $value | humanizePercentage }} over the last 5 minutes."
